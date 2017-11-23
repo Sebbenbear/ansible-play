@@ -1,0 +1,22 @@
+---
+- name: install and start apache # Name of the play you want to do
+  hosts: web # The name of the group of hosts in the inventory
+  remote_user: vagrant # User to ssh as
+  become_method: sudo # How to escalate priviliges
+  vars:
+    http_port: 80 # which port set for this play
+    max_clients: 200 #number of max clients to pass to apache once installed 
+  
+  tasks:
+  - name: install httpd # task to install the http daemon
+    yum: name=httpd state=latest
+  - name: write apache config file
+    template: src=srv/httpd.j2 dest=/etc/httpd.conf
+    nofify:
+    - restart apache
+  - name: start httpd
+    service: name=httpd state=running
+  
+  handlers:
+  - name: restart apache
+    service: name=httpd state=restarted
